@@ -23,7 +23,7 @@ the _-h_ argument should give you all the options in the app. but I would like t
 The program takes 3 arguments, 1 required and 2 optinal:<br>
 EMAIL -> required | possitinal arg, no flag. | can take a path to file containing emails.<br>
 output -> not required | -o OR --output flag | defualt = None.<br>
-verbose -> not required | -v OR --verbose flag | defualt = False.<br>
+verbose -> not required | -v OR --verbose flag | defualt = False. *MAKE SURE TO SET IT ON WHEN RUNNING WITH ONE MAIL!!!*<br>
 ### Command syntax:
 gv -o [ OUTPUT FILE ] -v [ EMAIL ]
 ### Example:
