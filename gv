@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+import argparse
+from termcolor import colored
+import requests
+import os
+
+validEmails = []
+verbose = False
+count = 0
+l = 1
+
+def checkEmail(email:str):
+    global count
+    """
+    Checking the response of a HEAD request, to a specific url.
+    If a cookie called COMPASS is in the response we can tell the user is valid.
+    """
+    count += 1
+    p = f"{count}/{l}"
+    print("Checking "+colored(email, "yellow")+f' <=> {p}\r', end="", flush=True)
+    url = "https://mail.google.com/mail/gxlu?email=" + email + "&zx=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    response = requests.head(url)
+    try:
+        isValid = response.cookies.items()[0][0] == "COMPASS"
+    except:
+        isValid = False
+    if isValid:
+        validEmails.append(email)
+        if verbose:
+            print("************** "+colored(email, "green")+" **************")
+
+
+def getArgs():
+    """
+    Get the command line arguments.
+    """
+    parser = argparse.ArgumentParser("gv", description="Validate a gmail email address.")
+    parser.add_argument("email", type=str, help="Specify the email address you want to check OR the email wordlist.")
+    parser.add_argument("-o", "--output", dest="output", help="Specify the output file.")
+    parser.add_argument("-v", "--verbose", dest="verbose", help="Specify if you want verbose output.", action="store_true", default=False)
+    return parser.parse_args()
+
+def main():
+    """
+    Main function.
+    handling the arguments, and executing the main part of the program.
+    """
+    global verbose, l
+    args = getArgs()
+    email  = args.email
+    verbose = args.verbose
+    output = args.output != None
+    isList = os.path.exists(args.email)
+    if isList:
+        with open(args.email, "r") as f:
+            data = f.read().splitlines()
+            f.close()
+        l = len(data)
+        for email in data:
+            try:
+                checkEmail(email)
+            except KeyboardInterrupt:
+                print(colored("\nCTRL + C...", on_color="on_red"))
+                break
+    else:   
+        checkEmail(email)
+    if output:
+        print(flush=True)
+        show_file = colored(args.output, "magenta")
+        print(colored(f"Writing to file <{show_file}>", "cyan"))
+        with open(args.output, "w") as f:
+            for e in validEmails:
+                f.write(e+"\n")
+            f.close()
+    
+    print("\nDone!")
+if __name__ == '__main__':
+    main()
